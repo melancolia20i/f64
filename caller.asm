@@ -1,0 +1,23 @@
+# ███████╗ ██████╗ ██╗  ██╗
+# ██╔════╝██╔════╝ ██║  ██║
+# █████╗  ███████╗ ███████║
+# ██╔══╝  ██╔═══██╗╚════██║
+# ██║     ╚██████╔╝     ██║
+# ╚═╝      ╚═════╝      ╚═╝
+#
+# tiny fprintf function for x86_64 assembly language
+# written in x86_64.
+#
+# contribuite to f64: https://github.com/melancolia20i/f64
+#
+# 'f64.asm' file is under MIT LINCESE
+#
+
+.section .text
+
+.globl _start
+
+_start:
+	movq	$60, %rax
+	movq	$0, %rdi
+	syscall
