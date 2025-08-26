@@ -14,6 +14,9 @@
 #
 
 .section .rodata
+	.fatal_1_msg: .string "f64: unknown format!\n"
+	.fatal_1_len: .quad   21
+
 	.buffersz: .quad 2048
 
 .section .bss
@@ -48,6 +51,17 @@
 	movq	-8(%rbp), %rdi
 	movq	%r9, %rdx
 	leaq	.buffer(%rip), %rsi
+	syscall
+.endm
+
+.macro FATAL fnl, fnm
+	movq	$1, %rax
+	movq	$2, %rdi
+	movq	\fnl, %rdx
+	leaq	\fnm, %rsi
+	syscall
+	movq	$60, %rax
+	movq	$-1, %rax
 	syscall
 .endm
 
@@ -94,11 +108,24 @@ f64:
 	incq	-120(%rbp)
 	jmp	.f64_resume
 .f64_format_found:
+	incq	-16(%rbp)
+	movq	-16(%rbp), %rax
+	movzbl	(%rax), %edi
+	cmpb	$'%', %dil
+	je	.f64_fmt_per
+	# XXX: formsta go here
+	jmp	.f64_fatal_unknown_format
+.f64_fmt_per:
+	movb	%dil, (%r8)
+	incq	%r8
+	incq	%r9
+	incq	-120(%rbp)
+	jmp	.f64_resume
+
 
 .f64_resume:
 	incq	-16(%rbp)
 	jmp	.f64_loop
-
 .f64_need_to_flush:
 	# prints the content of the buffer at this point
 	# and sets r8 and r9 back to the begining of the
@@ -113,3 +140,5 @@ f64:
 	movq	-120(%rbp), %rax
 	leave
 	ret
+.f64_fatal_unknown_format:
+	FATAL	.fatal_1_len(%rip), .fatal_1_msg(%rip)

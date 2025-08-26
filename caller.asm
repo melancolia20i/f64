@@ -14,7 +14,7 @@
 #
 
 .section .rodata
-	.msg: .string "0123456789\n"
+	.msg: .string "%%\n"
 
 .section .text
 
