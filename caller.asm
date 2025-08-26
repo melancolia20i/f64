@@ -14,7 +14,7 @@
 #
 
 .section .rodata
-	.msg: .string "%%\n"
+	.msg: .string "%x\n"
 
 .section .text
 
