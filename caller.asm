@@ -13,11 +13,18 @@
 # 'f64.asm' file is under MIT LINCESE
 #
 
+.section .rodata
+	.msg: .string "hi, this is f64\n"
+
 .section .text
 
 .globl _start
 
 _start:
+	movq	$1, %rdi
+	leaq	.msg(%rip), %rsi
+	call	f64
+
 	movq	$60, %rax
 	movq	$0, %rdi
 	syscall

@@ -13,6 +13,14 @@
 # this file is under MIT LINCESE
 #
 
+.section .rodata
+	.buffersz: .quad 2048
+
+.section .bss
+	.buffer: .zero 2048
+
+.section .text
+
 .macro SAVE_REG_N
 	movq	%r8 , -64(%rbp)
 	movq	%r9 , -72(%rbp)
@@ -35,7 +43,13 @@
 	movq	-112(%rbp), %r15
 .endm
 
-.section .text
+.macro PUTS
+	movq	$1, %rax
+	movq	-8(%rbp), %rdi
+	movq	%r9, %rdx
+	leaq	.buffer(%rip), %rsi
+	syscall
+.endm
 
 .globl f64
 f64:
@@ -58,16 +72,41 @@ f64:
 	movq	%r9,  -56(%rbp)
 	SAVE_REG_N	
 	movq	$0, -120(%rbp)
+	# in order to make f64 faster we're going to use
+	# a register to track the buffer
+	# r8: buffer itself
+	# r9: position within buffer (differs from -120 since r9 can be set to zero if the buffer needs to be flushed)
+	leaq	.buffer(%rip), %r8
+	movq	$0, %r9
 .f64_loop:
+	cmpq	%r9, (.buffersz)
+	je	.f64_need_to_flush
 	movq	-16(%rbp), %rax
 	movzbl	(%rax), %edi
 	cmpb	$0, %dil
 	je	.f64_fini
+	cmpb	$'%', %dil
+	je	.f64_format_found
+	movb	%dil, (%r8)
+	incq	%r8
+	incq	%r9
+	jmp	.f64_resume
+.f64_format_found:
 
 .f64_resume:
 	incq	-16(%rbp)
 	jmp	.f64_loop
+
+.f64_need_to_flush:
+	# prints the content of the buffer at this point
+	# and sets r8 and r9 back to the begining of the
+	# buffer
+	PUTS
+	xorq	%r9, %r9
+	leaq	.buffer(%rip), %r8
+	jmp	.f64_loop
 .f64_fini:
+	PUTS
 	PUT_BACK_REG_N
 	movq	-120(%rbp), %rax
 	leave
