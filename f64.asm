@@ -55,6 +55,7 @@
 f64:
 	pushq	%rbp
 	movq	%rsp, %rbp
+	subq	$120, %rsp
 	# stack distribution
 	# -8         : file descriptor
 	# -16        : format string
@@ -90,6 +91,7 @@ f64:
 	movb	%dil, (%r8)
 	incq	%r8
 	incq	%r9
+	incq	-120(%rbp)
 	jmp	.f64_resume
 .f64_format_found:
 

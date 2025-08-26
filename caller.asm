@@ -14,7 +14,7 @@
 #
 
 .section .rodata
-	.msg: .string "hi, this is f64\n"
+	.msg: .string "0123456789\n"
 
 .section .text
 
@@ -25,6 +25,6 @@ _start:
 	leaq	.msg(%rip), %rsi
 	call	f64
 
+	movq	%rax, %rdi
 	movq	$60, %rax
-	movq	$0, %rdi
 	syscall
